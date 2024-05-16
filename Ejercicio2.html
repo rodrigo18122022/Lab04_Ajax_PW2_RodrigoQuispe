@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 2: Confirmados por Región</title>
+</head>
+<body>
+    <h1>Confirmados por Región</h1>
+    <button id="loadConfirmed">Cargar Confirmados</button>
+    <ul id="confirmedList"></ul>
+
+    <script>
+        document.getElementById('loadConfirmed').addEventListener('click', function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'data.json', true);
+
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    const data = JSON.parse(this.responseText);
+                    let output = '';
+                    data.forEach(region => {
+                        const totalConfirmed = region.confirmed.reduce((sum, day) => sum + parseInt(day.value), 0);
+                        output += `<li>${region.region}: ${totalConfirmed}</li>`;
+                    });
+                    document.getElementById('confirmedList').innerHTML = output;
+                }
+            };
+
+            xhr.send();
+        });
+    </script>
+</body>
+</html>
