@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 1: Listar todas las regiones</title>
+</head>
+<body>
+    <h1>Lista de Regiones</h1>
+    <button id="loadRegions">Cargar Regiones</button>
+    <ul id="regionList"></ul>
+
+    <script>
+        document.getElementById('loadRegions').addEventListener('click', function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'data.json', true);
+
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    const data = JSON.parse(this.responseText);
+                    let output = '';
+                    data.forEach(region => {
+                        output += `<li>${region.region}</li>`;
+                    });
+                    document.getElementById('regionList').innerHTML = output;
+                }
+            };
+
+            xhr.send();
+        });
+    </script>
+</body>
+</html>
