@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 3: Top 10 Regiones</title>
+</head>
+<body>
+    <h1>Top 10 Regiones por Confirmados</h1>
+    <button id="loadTop10">Cargar Top 10</button>
+    <ul id="top10List"></ul>
+
+    <script>
+        document.getElementById('loadTop10').addEventListener('click', function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'data.json', true);
+
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    const data = JSON.parse(this.responseText);
+                    let regions = data.map(region => {
+                        const totalConfirmed = region.confirmed.reduce((sum, day) => sum + parseInt(day.value), 0);
+                        return { region: region.region, totalConfirmed: totalConfirmed };
+                    });
+                    regions.sort((a, b) => b.totalConfirmed - a.totalConfirmed);
+                    regions = regions.slice(0, 10);
+
+                    let output = '';
+                    regions.forEach(region => {
+                        output += `<li>${region.region}: ${region.totalConfirmed}</li>`;
+                    });
+                    document.getElementById('top10List').innerHTML = output;
+                }
+            };
+
+            xhr.send();
+        });
+    </script>
+</body>
+</html>
