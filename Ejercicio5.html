@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 5: Comparativo de Regiones</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+    <h1>Comparativo de Regiones</h1>
+    <button id="loadComparative">Cargar Gráfico</button>
+    <div id="comparative_chart" style="width: 900px; height: 500px"></div>
+
+    <script>
+        document.getElementById('loadComparative').addEventListener('click', function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'data.json', true);
+
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    const data = JSON.parse(this.responseText);
+                    const chartData = [['Fecha']];
+
+                    data.forEach(region => {
+                        chartData[0].push(region.region);
+                    });
+
+                    const dates = data[0].confirmed.map(day => day.date);
+                    dates.forEach((date, index) => {
+                        const row = [date];
+                        data.forEach(region => {
+                            row.push(parseInt(region.confirmed[index].value));
+                        });
+                        chartData.push(row);
+                    });
+
+                    google.charts.load('current', { 'packages': ['corechart'] });
+                    google.charts.setOnLoadCallback(function() {
+                        var dataTable = google.visualization.arrayToDataTable(chartData);
+                        var options = {
+                            title: 'Comparativo de Casos Confirmados entre Regiones',
+                            curveType: 'function',
+                            legend: { position: 'bottom' }
+                        };
+                        var chart = new google.visualization.LineChart(document.getElementById('comparative_chart'));
+                        chart.draw(dataTable, options);
+                    });
+                }
+            };
+
+            xhr.send();
+        });
+    </script>
+</body>
+</html>
