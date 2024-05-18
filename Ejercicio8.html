@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 8: Crecimiento Diario Comparativo</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+    <h1>Crecimiento Diario Comparativo (Excepto Lima y Callao)</h1>
+    <button id="loadGrowthDaily">Cargar Gráfico</button>
+    <div id="growth_daily_chart" style="width: 900px; height: 500px"></div>
+
+    <script>
+        document.getElementById('loadGrowthDaily').addEventListener('click', function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'data.json', true);
+
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    const data = JSON.parse(this.responseText);
+                    const filteredData = data.filter(region => region.region !== 'Lima' && region.region !== 'Callao');
+                    const chartData = [['Fecha']];
+
+                    filteredData.forEach(region => {
+                        chartData[0].push(region.region);
+                    });
+
+                    const dates = filteredData[0].confirmed.map(day => day.date);
+                    dates.forEach((date, index) => {
+                        const row = [date];
+                        filteredData.forEach(region => {
+                            row.push(parseInt(region.confirmed[index].value));
+                        });
+                        chartData.push(row);
+                    });
+
+                    google.charts.load('current', { 'packages': ['corechart'] });
+                    google.charts.setOnLoadCallback(function() {
+                        var dataTable = google.visualization.arrayToDataTable(chartData);
+                        var options = {
+                            title: 'Crecimiento Diario Comparativo de Casos Confirmados (Excepto Lima y Callao)',
+                            curveType: 'function',
+                            legend: { position: 'bottom' }
+                        };
+                        var chart = new google.visualization.LineChart(document.getElementById('growth_daily_chart'));
+                        chart.draw(dataTable, options);
+                    });
+                }
+            };
+
+            xhr.send();
+        });
+    </script>
+</body>
+</html>
