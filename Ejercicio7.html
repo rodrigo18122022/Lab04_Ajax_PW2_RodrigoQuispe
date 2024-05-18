@@ -8,8 +8,11 @@
 </head>
 <body>
     <h1>Comparativo por Selección de Regiones</h1>
-    <select id="regionsSelect" multiple>
-        <!-- Opciones de regiones se agregarán dinámicamente -->
+    <select id="region1Select">
+        <!-- Opciones de región 1 se agregarán dinámicamente -->
+    </select>
+    <select id="region2Select">
+        <!-- Opciones de región 2 se agregarán dinámicamente -->
     </select>
     <button id="loadSelectedComparative">Cargar Gráfico</button>
     <div id="selected_comparative_chart" style="width: 900px; height: 500px"></div>
@@ -22,12 +25,17 @@
             xhr.onload = function() {
                 if (this.status === 200) {
                     const data = JSON.parse(this.responseText);
-                    const select = document.getElementById('regionsSelect');
+                    const select1 = document.getElementById('region1Select');
+                    const select2 = document.getElementById('region2Select');
                     data.forEach(region => {
-                        const option = document.createElement('option');
-                        option.value = region.region;
-                        option.textContent = region.region;
-                        select.appendChild(option);
+                        const option1 = document.createElement('option');
+                        const option2 = document.createElement('option');
+                        option1.value = region.region;
+                        option1.textContent = region.region;
+                        option2.value = region.region;
+                        option2.textContent = region.region;
+                        select1.appendChild(option1);
+                        select2.appendChild(option2);
                     });
                 }
             };
@@ -36,10 +44,11 @@
         });
 
         document.getElementById('loadSelectedComparative').addEventListener('click', function() {
-            const selectedRegions = Array.from(document.getElementById('regionsSelect').selectedOptions).map(option => option.value);
+            const region1 = document.getElementById('region1Select').value;
+            const region2 = document.getElementById('region2Select').value;
 
-            if (selectedRegions.length === 0) {
-                alert('Por favor selecciona al menos una región');
+            if (!region1 || !region2) {
+                alert('Por favor selecciona dos regiones');
                 return;
             }
 
@@ -49,27 +58,20 @@
             xhr.onload = function() {
                 if (this.status === 200) {
                     const data = JSON.parse(this.responseText);
-                    const filteredData = data.filter(region => selectedRegions.includes(region.region));
-                    const chartData = [['Fecha']];
+                    const region1Data = data.find(region => region.region === region1);
+                    const region2Data = data.find(region => region.region === region2);
+                    const chartData = [['Fecha', region1, region2]];
 
-                    filteredData.forEach(region => {
-                        chartData[0].push(region.region);
-                    });
-
-                    const dates = filteredData[0].confirmed.map(day => day.date);
+                    const dates = region1Data.confirmed.map(day => day.date);
                     dates.forEach((date, index) => {
-                        const row = [date];
-                        filteredData.forEach(region => {
-                            row.push(parseInt(region.confirmed[index].value));
-                        });
-                        chartData.push(row);
+                        chartData.push([date, parseInt(region1Data.confirmed[index].value), parseInt(region2Data.confirmed[index].value)]);
                     });
 
                     google.charts.load('current', { 'packages': ['corechart'] });
                     google.charts.setOnLoadCallback(function() {
                         var dataTable = google.visualization.arrayToDataTable(chartData);
                         var options = {
-                            title: 'Comparativo de Casos Confirmados entre Regiones Seleccionadas',
+                            title: `Comparativo de Casos Confirmados entre ${region1} y ${region2}`,
                             curveType: 'function',
                             legend: { position: 'bottom' }
                         };
